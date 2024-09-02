@@ -1,0 +1,275 @@
+# Default values for datahub-hasura.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: nginx
+  pullPolicy: IfNotPresent
+  tag: "stable"
+  namespace: "datahub-hasura"
+imagePullSecrets: 
+  - name: gcr
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: NodePort
+  port: 80
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+    nginx.ingress.kubernetes.io/canary: "false"
+    nginx.ingress.kubernetes.io/canary-weight: "10"
+
+  hosts:
+    - host: api.customerhub.dev.bri.co.id
+      paths:
+        - path: /api/v1/hasura-chm-new/(.*|$)
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+
+env:
+
+  # Hasura Main Configs
+  - name: HASURA_GRAPHQL_METADATA_DATABASE_URL
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_GRAPHQL_METADATA_DATABASE_URL
+  - name: HASURA_GRAPHQL_ADMIN_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_GRAPHQL_ADMIN_SECRET
+  - name: HASURA_GRAPHQL_ENABLE_CONSOLE
+    value: "y"
+  - name: HASURA_GRAPHQL_ENABLED_LOG_TYPES                 
+    value: "startup, http-log, webhook-log, websocket-log, query-log"
+  - name: HASURA_GRAPHQL_CONSOLE_ASSETS_DIR                 
+    value: "/srv/console-assets"
+  - name: HASURA_GRAPHQL_EE_LICENSE_KEY 
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_GRAPHQL_EE_LICENSE_KEY 
+  - name: HASURA_GRAPHQL_ENABLED_APIS                 
+    value: "metadata,graphql,config,metrics"
+  - name: HASURA_GRAPHQL_METRICS_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_GRAPHQL_METRICS_SECRET
+  - name: HASURA_GRAPHQL_JWT_SECRET
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_GRAPHQL_JWT_SECRET
+  - name: HASURA_GRAPHQL_METADATA_DIR
+    value: '/app/metadata'
+  - name: HASURA_GRAPHQL_MIGRATIONS_SERVER_TIMEOUT
+    value: '120'
+  - name: HASURA_GRAPHQL_ENABLE_REMOTE_SCHEMA_PERMISSIONS
+    value: 'true'
+  - name: HASURA_GRAPHQL_REDIS_URL
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_GRAPHQL_REDIS_URL
+  
+  # Databases
+  - name: HASURA_APP_SQLSERVER_LOSBRICC_URL
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_APP_SQLSERVER_LOSBRICC_URL
+  - name: HASURA_DATAHUB_1800_CARDLINK_URL
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_DATAHUB_1800_CARDLINK_URL
+  - name: HASURA_DATAHUB_POSTGRESQL_CHM_URL
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_DATAHUB_POSTGRESQL_CHM_URL
+  - name: HASURA_DATAHUB_SQLSERVER_CHM_URL
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_DATAHUB_SQLSERVER_CHM_URL
+  
+  # OTLES
+  - name: HASURA_OTEL_TRACES_ENDPOINT
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_OTEL_TRACES_ENDPOINT
+  - name: HASURA_OTEL_METRICS_ENDPOINT
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_OTEL_METRICS_ENDPOINT
+  - name: HASURA_OTEL_LOGS_ENDPOINT
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_OTEL_LOGS_ENDPOINT
+  - name: HASURA_DEPLOYMENT_ENVIRONMENT
+    value: 'development'
+
+    # Remote Schemas
+  - name: HASURA_REMOTE_SCHEMA_CHM_SCHEMA
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_REMOTE_SCHEMA_CHM_SCHEMA
+  - name: HASURA_REMOTE_SCHEMA_DEMOGRAPHY
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_REMOTE_SCHEMA_DEMOGRAPHY
+  - name: HASURA_REMOTE_SCHEMA_PORTOFOLIO
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_REMOTE_SCHEMA_PORTOFOLIO
+    
+  # Hasura Actions
+  - name: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_WEBHOOK
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_WEBHOOK
+  - name: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_HEADER_X_CHANNEL_ID
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_HEADER_X_CHANNEL_ID
+  - name: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_HEADER_X_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_HEADER_X_API_KEY
+
+  - name: HASURA_ACTION_INQUIRY_CARD_DATA_WEBHOOK
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_CARD_DATA_WEBHOOK
+  - name: HASURA_ACTION_INQUIRY_CARD_DATA_HEADER_X_CHANNEL_ID
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_CARD_DATA_HEADER_X_CHANNEL_ID
+  - name: HASURA_ACTION_INQUIRY_CARD_DATA_HEADER_X_API_KEY
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_CARD_DATA_HEADER_X_API_KEY
+
+  - name: HASURA_ACTION_INQUIRY_BRIMOLA_PANGKALAN_WEBHOOK
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_BRIMOLA_PANGKALAN_WEBHOOK
+  - name: HASURA_ACTION_INQUIRY_BRIMOLA_PANGKALAN_APP_KEY
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_BRIMOLA_PANGKALAN_APP_KEY
+
+  - name: HASURA_ACTION_INQUIRY_BRIMOLA_TRANSACTION_WEBHOOK
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_BRIMOLA_TRANSACTION_WEBHOOK
+  - name: HASURA_ACTION_INQUIRY_BRIMOLA_TRANSACTION_APP_KEY
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_BRIMOLA_TRANSACTION_APP_KEY
+
+  - name: HASURA_ACTION_INQUIRY_HOLD_STATUS_WEBHOOK
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_HOLD_STATUS_WEBHOOK
+  - name: HASURA_ACTION_INQUIRY_HOLD_STATUS_AUTHORIZATION
+    valueFrom:
+      secretKeyRef:
+        name: hasura-chm-dev-secrets
+        key: HASURA_ACTION_INQUIRY_HOLD_STATUS_AUTHORIZATION
+  
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

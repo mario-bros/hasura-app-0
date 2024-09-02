@@ -1,0 +1,4 @@
+- name: firebase_user_profile
+  definition:
+    url_from_env: REMOTE_SCHEME_URL
+    timeout_seconds: 60
