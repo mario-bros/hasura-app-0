@@ -6,7 +6,7 @@ pipeline {
   agent any
   environment {
     DOCKER_IMAGE = "hasura/graphql-engine"
-    DOCKER_TAG = "v2.8.1.cli-migrations-v3"
+    DOCKER_TAG = "v2.40.2"
     TAG = "${env.GIT_COMMIT.take(8)}"
     PROJECT_NAME = "${appName}"
     NAMESPACE = "${namespace}"

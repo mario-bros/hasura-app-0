@@ -55,7 +55,7 @@ ingress:
   hosts:
     - host: api.customerhub.dev.bri.co.id
       paths:
-        - path: /api/v1/hasura-chm-new/(.*|$)
+        - path: /api/v1/hasura-datahub/(.*|$)
           pathType: ImplementationSpecific
   tls: []
   #  - secretName: chart-example-tls
@@ -64,7 +64,6 @@ ingress:
 
 
 env:
-
   # Hasura Main Configs
   - name: HASURA_GRAPHQL_METADATA_DATABASE_URL
     valueFrom:
