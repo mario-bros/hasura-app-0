@@ -5,12 +5,11 @@
 replicaCount: 1
 
 image:
-  repository: nginx
+  repository: mari0br0s/datahub-hasura
   pullPolicy: IfNotPresent
-  tag: "stable"
+  tag: "latest"
   namespace: "datahub-hasura"
-imagePullSecrets: 
-  - name: gcr
+
 nameOverride: ""
 fullnameOverride: ""
 
@@ -40,11 +39,14 @@ securityContext: {}
   # runAsUser: 1000
 
 service:
-  type: NodePort
-  port: 80
+  type: LoadBalancer
+  protocol: TCP
+  port: 8080
+  targetPort: 80
+  # port: 80
 
 ingress:
-  enabled: true
+  enabled: false
   className: ""
   annotations:
     kubernetes.io/ingress.class: nginx
@@ -53,7 +55,7 @@ ingress:
     nginx.ingress.kubernetes.io/canary-weight: "10"
 
   hosts:
-    - host: api.customerhub.dev.bri.co.id
+    - host: 34.34.220.237
       paths:
         - path: /api/v1/hasura-datahub/(.*|$)
           pathType: ImplementationSpecific
@@ -66,174 +68,25 @@ ingress:
 env:
   # Hasura Main Configs
   - name: HASURA_GRAPHQL_METADATA_DATABASE_URL
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_GRAPHQL_METADATA_DATABASE_URL
+    value: "postgres://postgres:ceClVat?eK[}T9Iq@34.50.73.55:5432/postgres"
   - name: HASURA_GRAPHQL_ADMIN_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_GRAPHQL_ADMIN_SECRET
+    value: "123456"
   - name: HASURA_GRAPHQL_ENABLE_CONSOLE
     value: "y"
-  - name: HASURA_GRAPHQL_ENABLED_LOG_TYPES                 
+  - name: HASURA_GRAPHQL_ENABLED_LOG_TYPES
     value: "startup, http-log, webhook-log, websocket-log, query-log"
-  - name: HASURA_GRAPHQL_CONSOLE_ASSETS_DIR                 
-    value: "/srv/console-assets"
-  - name: HASURA_GRAPHQL_EE_LICENSE_KEY 
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_GRAPHQL_EE_LICENSE_KEY 
-  - name: HASURA_GRAPHQL_ENABLED_APIS                 
+  
+  
+  - name: HASURA_GRAPHQL_ENABLED_APIS
     value: "metadata,graphql,config,metrics"
-  - name: HASURA_GRAPHQL_METRICS_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_GRAPHQL_METRICS_SECRET
+
   - name: HASURA_GRAPHQL_JWT_SECRET
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_GRAPHQL_JWT_SECRET
+    value: '{"type":"RS256","jwk_url": "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com", "audience": "hasura-course", "issuer": "https://securetoken.google.com/hasura-trigger-function"}'
   - name: HASURA_GRAPHQL_METADATA_DIR
     value: '/app/metadata'
   - name: HASURA_GRAPHQL_MIGRATIONS_SERVER_TIMEOUT
     value: '120'
-  - name: HASURA_GRAPHQL_ENABLE_REMOTE_SCHEMA_PERMISSIONS
-    value: 'true'
-  - name: HASURA_GRAPHQL_REDIS_URL
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_GRAPHQL_REDIS_URL
-  
-  # Databases
-  - name: HASURA_APP_SQLSERVER_LOSBRICC_URL
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_APP_SQLSERVER_LOSBRICC_URL
-  - name: HASURA_DATAHUB_1800_CARDLINK_URL
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_DATAHUB_1800_CARDLINK_URL
-  - name: HASURA_DATAHUB_POSTGRESQL_CHM_URL
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_DATAHUB_POSTGRESQL_CHM_URL
-  - name: HASURA_DATAHUB_SQLSERVER_CHM_URL
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_DATAHUB_SQLSERVER_CHM_URL
-  
-  # OTLES
-  - name: HASURA_OTEL_TRACES_ENDPOINT
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_OTEL_TRACES_ENDPOINT
-  - name: HASURA_OTEL_METRICS_ENDPOINT
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_OTEL_METRICS_ENDPOINT
-  - name: HASURA_OTEL_LOGS_ENDPOINT
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_OTEL_LOGS_ENDPOINT
-  - name: HASURA_DEPLOYMENT_ENVIRONMENT
-    value: 'development'
 
-    # Remote Schemas
-  - name: HASURA_REMOTE_SCHEMA_CHM_SCHEMA
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_REMOTE_SCHEMA_CHM_SCHEMA
-  - name: HASURA_REMOTE_SCHEMA_DEMOGRAPHY
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_REMOTE_SCHEMA_DEMOGRAPHY
-  - name: HASURA_REMOTE_SCHEMA_PORTOFOLIO
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_REMOTE_SCHEMA_PORTOFOLIO
-    
-  # Hasura Actions
-  - name: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_WEBHOOK
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_WEBHOOK
-  - name: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_HEADER_X_CHANNEL_ID
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_HEADER_X_CHANNEL_ID
-  - name: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_HEADER_X_API_KEY
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_ACCOUNT_HISTORY_HEADER_X_API_KEY
-
-  - name: HASURA_ACTION_INQUIRY_CARD_DATA_WEBHOOK
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_CARD_DATA_WEBHOOK
-  - name: HASURA_ACTION_INQUIRY_CARD_DATA_HEADER_X_CHANNEL_ID
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_CARD_DATA_HEADER_X_CHANNEL_ID
-  - name: HASURA_ACTION_INQUIRY_CARD_DATA_HEADER_X_API_KEY
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_CARD_DATA_HEADER_X_API_KEY
-
-  - name: HASURA_ACTION_INQUIRY_BRIMOLA_PANGKALAN_WEBHOOK
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_BRIMOLA_PANGKALAN_WEBHOOK
-  - name: HASURA_ACTION_INQUIRY_BRIMOLA_PANGKALAN_APP_KEY
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_BRIMOLA_PANGKALAN_APP_KEY
-
-  - name: HASURA_ACTION_INQUIRY_BRIMOLA_TRANSACTION_WEBHOOK
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_BRIMOLA_TRANSACTION_WEBHOOK
-  - name: HASURA_ACTION_INQUIRY_BRIMOLA_TRANSACTION_APP_KEY
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_BRIMOLA_TRANSACTION_APP_KEY
-
-  - name: HASURA_ACTION_INQUIRY_HOLD_STATUS_WEBHOOK
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_HOLD_STATUS_WEBHOOK
-  - name: HASURA_ACTION_INQUIRY_HOLD_STATUS_AUTHORIZATION
-    valueFrom:
-      secretKeyRef:
-        name: hasura-chm-dev-secrets
-        key: HASURA_ACTION_INQUIRY_HOLD_STATUS_AUTHORIZATION
-  
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

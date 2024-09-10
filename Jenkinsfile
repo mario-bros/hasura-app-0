@@ -1,5 +1,5 @@
 def namespace = "hasura-namespace"
-def appName = 'hasura-example'
+def appName = 'datahub-hasura'
 
 
 pipeline {
@@ -9,7 +9,7 @@ pipeline {
     DOCKER_TAG = "v2.40.2"
     TAG = "${env.GIT_COMMIT.take(8)}"
     PROJECT_NAME = "${appName}"
-    NAMESPACE = "${namespace}"
+    KUBE_NAMESPACE = "${namespace}"
   }
   
   stages {
@@ -17,13 +17,17 @@ pipeline {
     stage('Build Development') {
       environment {
         DOCKER_REGISTRY_URL = 'registry.hub.docker.com'
-        DOCKER_CREDENTIALS = credentials('docker_registry')
-        DOCKER_REPO_CREDENTIALS = credentials('image_repo_bri')
+        // docker pull mari0br0s/simple-api-server:0.0.3
+        DOCKER_CREDENTIALS_USR = credentials('docker_credentials_usr')
+        DOCKER_CREDENTIALS_PSW = credentials('docker_credentials_psw')
       }
       when {
         branch 'development'
       }
       steps {
+        echo "Docker username: ${DOCKER_CREDENTIALS_USR}"
+        echo "Docker password: ${DOCKER_CREDENTIALS_PSW}"
+
         sh 'docker login ${DOCKER_REGISTRY_URL} -u $DOCKER_CREDENTIALS_USR -p ${DOCKER_CREDENTIALS_PSW}'
         sh 'docker build -t ${DOCKER_REGISTRY_URL}/${PROJECT_NAME}:${TAG} .'
         sh 'docker push ${DOCKER_REGISTRY_URL}/${PROJECT_NAME}:${TAG}'
@@ -42,14 +46,14 @@ pipeline {
         sh """
               helm upgrade ${PROJECT_NAME} ./helm/${PROJECT_NAME} \
                 --set-string image.repository=${DOCKER_REGISTRY_URL}/${PROJECT_NAME},image.tag=${TAG} \
-                -f helm/${PROJECT_NAME}/values.development.yaml --debug --install --namespace ${NAMESPACE}
+                -f helm/${PROJECT_NAME}/values.development.yaml --debug --install --namespace ${KUBE_NAMESPACE}
             """
       }
     }
     stage('Apply Metadata Development') {
       environment {
-        ENDPOINT = 'http://api.customerhub.dev.bri.co.id/api/v1/hasura-chm-schema'
-        ADMIN_SECRET = credentials('hasura_chm_admin_secret')
+        ENDPOINT = 'http://34.34.220.237/api/v1/datahub-hasura'
+        ADMIN_SECRET = credentials('hasura_admin_secret')
       }
       when {
         branch 'development'
