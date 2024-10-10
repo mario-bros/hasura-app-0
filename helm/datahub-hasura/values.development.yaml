@@ -68,7 +68,10 @@ ingress:
 env:
   # Hasura Main Configs
   - name: HASURA_GRAPHQL_METADATA_DATABASE_URL
-    value: "postgres://postgres:ceClVat?eK[}T9Iq@34.50.73.55:5432/postgres"
+    valueFrom:
+      secretKeyRef:
+        name: hasura-app-0-secrets
+        key: HASURA_GRAPHQL_METADATA_DATABASE_URL
   - name: HASURA_GRAPHQL_ADMIN_SECRET
     value: "123456"
   - name: HASURA_GRAPHQL_ENABLE_CONSOLE
